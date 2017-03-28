@@ -2,7 +2,7 @@
   "name": "@sidehackhq/mail",
   "version": "1.0.1",
   "description": "Simple mail client for JS environments.",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "mocha",
     "watch": "babel src --watch -d lib",
