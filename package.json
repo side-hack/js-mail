@@ -27,6 +27,7 @@
   "dependencies": {
     "email-templates": "^2.5.4",
     "handlebars": "^4.0.6",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "node-ses": "^2.0.5"
   }
 }

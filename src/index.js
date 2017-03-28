@@ -1,5 +1,6 @@
-import _ from 'lodash';
 import { EmailTemplate } from 'email-templates';
+import _ from 'lodash';
+
 import { SesTransport } from './Transport/Ses';
 
 export class Mail {
@@ -26,7 +27,9 @@ export class Mail {
 			return transport;
 		}
 		let transportClass = this.loadTransport(transport);
-		return transportClass.send;
+		return function(...args) {
+			return transportClass.send.apply(transportClass, args)
+		};
 	}
 
 	set transport(transport) {
@@ -34,9 +37,9 @@ export class Mail {
 	}
 
 	addRecipients(...recipients) {
-		let current = this.config('recipients') || [];
+		let current = this.config('to') || [];
 		let updated = _.concat(recipients, current);
-		return this.config('recipients', updated);
+		return this.config('to', updated);
 	}
 
 	config(...args) {
@@ -62,9 +65,9 @@ export class Mail {
 		return new classes[transport.name](transport.options || {});
 	}
 
-	render(body = null, template = null) {
-		body = body || this.config('body');
-		template = template || this.config('template');
+	render(options = {}) {
+		let body = options.body || this.config('body');
+		let template = options.template || this.config('template');
 
 		// body & template
 		if(!_.isString(body) && !template) {
@@ -96,15 +99,18 @@ export class Mail {
 		return Promise.resolve(body);
 	}
 
-	send(recipients = null, from = null, subject = null, body = null, template = null) {
-		recipients = recipients || this.config('recipients') || [];
-		from = from || this.config('from');
-		subject = subject || this.config('subject') || '';
-		body = this.render(body, template);
-		let that = this;
+	send(options = {}) {
+		let to = options.to || this.config('to') || [];
+		let from = options.from || this.config('from');
+		let subject = options.subject || this.config('subject') || '';
+		let body = this.render({
+			body: options.body,
+			template: options.template
+		});
+		let transport = this.transport;
 
 		// validate recipients
-		if(!recipients.length) {
+		if(!to.length) {
 			throw 'No recipients defined.';
 		}
 
@@ -113,9 +119,14 @@ export class Mail {
 			throw 'No from address defined.';
 		}
 
-		return body.then(function(body) {
-			subject = body.subject || subject;
-			return that.transport(recipients, from, body.html, body.text, subject);
+		return body.then(body => {
+			return transport({
+				to: to,
+				from: from,
+				html: body.html,
+				text: body.text,
+				subject: body.subject || subject
+			});
 		});
 	}
 }
