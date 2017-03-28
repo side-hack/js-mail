@@ -19,12 +19,10 @@ export class SesTransport extends Transport {
 		if(!this.config.secret)
 			throw 'SesTransport requires `secret` in the configuration.';
 
-		// validate ses requirements
 		return super.validate(options);
 	}
 
 	send(options) {
-		// merge options here
 		this.validate(options);
 
 		let client = this.client;
