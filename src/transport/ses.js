@@ -1,14 +1,11 @@
 export class SesTransport {
-	constructor(options) {
+	constructor(options) {}
 
-	}
-
-	send(recipients, from, body, subject) {
-		return body.then(function(result) {
-			console.log(recipients);
-			console.log(from);
-			console.log(subject);
-			console.log(result);
-		})
+	send(recipients, from, html, plaintext = null, subject = null) {
+		console.log(recipients);
+		console.log(from);
+		console.log(html);
+		console.log(plaintext);
+		console.log(subject);
 	}
 }

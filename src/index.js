@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { EmailTemplate } from 'email-templates';
-import { SesTransport } from './transport/ses';
+import { SesTransport } from './Transport/Ses';
 
 export class Mail {
 	constructor(defaults = {}) {
@@ -20,6 +20,25 @@ export class Mail {
 		this._defaults = defaults;
 	}
 
+	get transport() {
+		let transport = this.config('transport');
+		if(_.isFunction(transport)) {
+			return transport;
+		}
+		let transportClass = this.loadTransport(transport);
+		return transportClass.send;
+	}
+
+	set transport(transport) {
+		this.config('transport', transport);
+	}
+
+	addRecipients(...recipients) {
+		let current = this.config('recipients') || [];
+		let updated = _.concat(recipients, current);
+		return this.config('recipients', updated);
+	}
+
 	config(...args) {
 		let config = _.merge(this._config, this.defaults);
 		// get all
@@ -35,35 +54,12 @@ export class Mail {
 		return _.set(this._config, args[0], args[1]);
 	}
 
-	get transport() {
-		let transport = this.config('transport');
-		let method = function() {
-			throw 'No valid transports defined.';
-		};
-
-		if(_.isFunction(transport)) {
-			return transport;
-		}
-
-		let transportClass = this.loadTransport(transport);
-		return transportClass.send;
-	}
-
-	set transport(transport) {
-		this.config('transport', transport);
-	}
-
 	loadTransport(transport) {
 		let classes = {
 			'Ses': SesTransport
 		};
+		if(!classes[transport.name]) throw 'No valid transports defined.';
 		return new classes[transport.name](transport.options || {});
-	}
-
-	addRecipients(...recipients) {
-		let current = this.config('recipients') || [];
-		let updated = _.concat(recipients, current);
-		return this.config('recipients', updated);
 	}
 
 	render(body = null, template = null) {
@@ -90,6 +86,13 @@ export class Mail {
 			return engine.render(body);
 		}
 
+		if(_.isString(body)) {
+			return Promise.resolve({
+				html: body,
+				text: null
+			});
+		}
+
 		return Promise.resolve(body);
 	}
 
@@ -98,6 +101,7 @@ export class Mail {
 		from = from || this.config('from');
 		subject = subject || this.config('subject') || '';
 		body = this.render(body, template);
+		let that = this;
 
 		// validate recipients
 		if(!recipients.length) {
@@ -109,6 +113,9 @@ export class Mail {
 			throw 'No from address defined.';
 		}
 
-		return this.transport(recipients, from, body, subject);
+		return body.then(function(body) {
+			subject = body.subject || subject;
+			return that.transport(recipients, from, body.html, body.text, subject);
+		});
 	}
 }
