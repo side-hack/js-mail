@@ -78,7 +78,13 @@ export class Mail {
 		}
 
 		if(template) {
-			let engine = new EmailTemplate(template);
+			let path = template;
+			let options = {};
+			if(_.isObject(template)) {
+				path = template.path;
+				options = template.options || {};
+			}
+			let engine = new EmailTemplate(path, options);
 			return engine.render(body);
 		}
 
