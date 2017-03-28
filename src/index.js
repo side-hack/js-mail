@@ -47,7 +47,7 @@ export class Mail {
 			var classes = {
 				'Ses': SesTransport
 			};
-			let transportClass = new classes[transport.name]();
+			let transportClass = new classes[transport.name](transport.options || {});
 			method = transportClass.send;
 		}
 
@@ -64,9 +64,9 @@ export class Mail {
 		return this.config('recipients', updated);
 	}
 
-	render() {
-		var body = this.config('body');
-		var template = this.config('template');
+	render(body = null, template = null) {
+		var body = body || this.config('body');
+		var template = template || this.config('template');
 
 		// body & template
 		if(!_.isString(body) && !template) {
@@ -85,14 +85,11 @@ export class Mail {
 		return Promise.resolve(body);
 	}
 
-	send(config) {
-		if(config) this.config(config);
-
-		var recipients = this.config('recipients') || [];
-		var from = this.config('from');
-		var subject = this.config('subject') || '';
-		var body = this.render();
-		var transportOptions = this.config('transport.options') || {};
+	send(recipients = null, from = null, subject = null, body = null, template = null) {
+		var recipients = recipients || this.config('recipients') || [];
+		var from = from || this.config('from');
+		var subject = subject || this.config('subject') || '';
+		var body = this.render(body, template);
 
 		// validate recipients
 		if(!recipients.length) {
@@ -104,6 +101,6 @@ export class Mail {
 			throw 'No from address defined.';
 		}
 
-		return this.transport(recipients, from, body, subject, transportOptions);
+		return this.transport(recipients, from, body, subject);
 	}
 }
