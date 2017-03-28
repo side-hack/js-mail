@@ -44,7 +44,7 @@ export class Mail {
 		if(_.isFunction(transport)) {
 			method = transport;
 		} else {
-			var classes = {
+			let classes = {
 				'Ses': SesTransport
 			};
 			let transportClass = new classes[transport.name](transport.options || {});
@@ -65,8 +65,8 @@ export class Mail {
 	}
 
 	render(body = null, template = null) {
-		var body = body || this.config('body');
-		var template = template || this.config('template');
+		let body = body || this.config('body');
+		let template = template || this.config('template');
 
 		// body & template
 		if(!_.isString(body) && !template) {
@@ -92,10 +92,10 @@ export class Mail {
 	}
 
 	send(recipients = null, from = null, subject = null, body = null, template = null) {
-		var recipients = recipients || this.config('recipients') || [];
-		var from = from || this.config('from');
-		var subject = subject || this.config('subject') || '';
-		var body = this.render(body, template);
+		let recipients = recipients || this.config('recipients') || [];
+		let from = from || this.config('from');
+		let subject = subject || this.config('subject') || '';
+		let body = this.render(body, template);
 
 		// validate recipients
 		if(!recipients.length) {
