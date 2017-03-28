@@ -3,7 +3,7 @@
 ## Example
 ### index.js
 ```js
-var Mailer = require('sidehack-mail-js').Mail;
+var Mailer = require('@sidehackhq/mail').Mail;
 var path = require('path');
 
 var mail = new Mailer({
