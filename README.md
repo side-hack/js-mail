@@ -4,22 +4,21 @@
 ### index.js
 ```js
 var Mailer = require('@sidehackhq/mail').Mail;
+var TemplateEngine = require('@sidehackhq/mail/lib/TemplateEngine/EmailTemplates').EmailTemplatesTemplateEngine;
+var Transport = require('@sidehackhq/mail/lib/Transport/Ses').SesTransport;
 var path = require('path');
 
 var mail = new Mailer({
 	from: 'FROM',
 	subject: 'sidehack-mail-js: testing',
-	transport: {
-		name: 'Ses',
-		options: {
-			key: 'SES_KEY',
-			secret: 'SES_KEY',
-			amazon: 'https://email.REGION.amazonaws.com' // omitting this will default to `https://email.us-east-1.amazonaws.com`
-		}
-	},
-	template: {
+	transport: new Transport({
+		key: 'SES_KEY',
+		secret: 'SES_KEY',
+		amazon: 'https://email.REGION.amazonaws.com' // omitting this will default to `https://email.us-east-1.amazonaws.com`
+	}),
+	template: new TemplateEngine({
 		path: path.join(__dirname, 'templates', 'test'), // points to `templates/test/`, `html.hbs` is required at this path
-	}
+	}),
 });
 
 mail.send({

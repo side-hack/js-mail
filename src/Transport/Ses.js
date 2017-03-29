@@ -5,21 +5,21 @@ import { Transport } from './Transport';
 
 export class SesTransport extends Transport {
 	constructor(config) {
+		this.key = config.key;
+		this.secret = config.secret;
+		this.amazon = config.amazon;
+		_.omit(config, ['key', 'secret', 'amazon']);
 		super(config);
 	}
 
 	get client() {
-		return Ses.createClient({ key: this.config.key, secret: this.config.secret, amazon: this.config.amazon });
-	}
-
-	validate(options) {
-		if(!this.config.key)
+		if(!this.key)
 			throw 'SesTransport requires `key` in the configuration.';
 
-		if(!this.config.secret)
+		if(!this.secret)
 			throw 'SesTransport requires `secret` in the configuration.';
 
-		return super.validate(options);
+		return Ses.createClient({ key: this.key, secret: this.secret, amazon: this.amazon });
 	}
 
 	send(options) {
