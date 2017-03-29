@@ -5,11 +5,11 @@ import { Transport } from './Transport';
 
 export class SesTransport extends Transport {
 	constructor(config) {
+		super(config);
 		this.key = config.key;
 		this.secret = config.secret;
 		this.amazon = config.amazon;
-		_.omit(config, ['key', 'secret', 'amazon']);
-		super(config);
+		_.omit(this.config, ['key', 'secret', 'amazon']);
 	}
 
 	get client() {
